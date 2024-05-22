@@ -13,7 +13,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/x64")
 
 # Define source files
 set(src_files
-    src/main.c
+    src/array.h
+    src/array.c
     src/display.h
     src/display.c
     src/vector.h
@@ -21,6 +22,7 @@ set(src_files
     src/mesh.h
     src/mesh.c
     src/triangle.h
+    src/main.c
 )
 
 # Add executable

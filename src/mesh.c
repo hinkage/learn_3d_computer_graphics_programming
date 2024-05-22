@@ -1,13 +1,18 @@
 #include "mesh.h"
+#include "array.h"
 #include "triangle.h"
+#include <stdio.h>
+#include <string.h>
 
-vec3_t mesh_vertices[N_MESH_VERTICES] = {
+mesh_t mesh = {.vertices = NULL, .faces = NULL, .rotation = {0, 0, 0}};
+
+vec3_t cube_vertices[N_CUBE_VERTICES] = {
     {-1, -1, -1}, // 1
     {-1, 1, -1},  // 2
     {1, 1, -1},   {1, -1, -1}, {1, 1, 1}, {1, -1, 1}, {-1, 1, 1}, {-1, -1, 1},
 };
 
-face_t mesh_faces[N_MESH_FACES] = {
+face_t cube_faces[N_CUBE_FACES] = {
     // front
     {1, 2, 3},
     {1, 3, 4},
@@ -26,3 +31,48 @@ face_t mesh_faces[N_MESH_FACES] = {
     // bottom
     {6, 8, 1},
     {6, 1, 4}};
+
+void load_cube_mesh_data(void) {
+    for (int i = 0; i < N_CUBE_VERTICES; i++) {
+        vec3_t cube_vertex = cube_vertices[i];
+        array_push(mesh.vertices, cube_vertex);
+    }
+    for (int i = 0; i < N_CUBE_FACES; i++) {
+        face_t cube_face = cube_faces[i];
+        array_push(mesh.faces, cube_face);
+    }
+}
+
+void load_obj_file_data(char *filename) {
+    FILE *file;
+    file = fopen(filename, "r");
+    char line[1024];
+    while (fgets(line, 1024, file)) {
+        // Vertex
+        if (0 == strncmp(line, "v ", 2)) {
+            vec3_t vertex;
+            sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
+            array_push(mesh.vertices, vertex);
+        }
+        // Face
+        if (0 == strncmp(line, "f ", 2)) {
+            int vertex_indices[3];
+            int texture_indices[3];
+            int normal_indices[3];
+            if (strstr(line, "/") != NULL) {
+                sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &vertex_indices[0],
+                       &texture_indices[0], &normal_indices[0],
+                       &vertex_indices[1], &texture_indices[1],
+                       &normal_indices[1], &vertex_indices[2],
+                       &texture_indices[2], &normal_indices[2]);
+            } else {
+                sscanf(line, "f %d %d %d", &vertex_indices[0],
+                       &vertex_indices[1], &vertex_indices[2]);
+            }
+            face_t face = {vertex_indices[0], vertex_indices[1],
+                           vertex_indices[2]};
+            array_push(mesh.faces, face)
+        }
+    }
+    fclose(file);
+}
