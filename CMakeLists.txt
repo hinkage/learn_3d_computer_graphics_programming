@@ -18,6 +18,9 @@ set(src_files
     src/display.c
     src/vector.h
     src/vector.c
+    src/mesh.h
+    src/mesh.c
+    src/triangle.h
 )
 
 # Add executable
