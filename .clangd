@@ -1,0 +1,5 @@
+Diagnostics:
+  ClangTidy:
+    Add: ['bugprone-*','misc-*','clang-analyzer-*']
+    CheckOptions:
+      misc-non-private-member-variables-in-classes.IgnorePublicMemberVariables = 1
