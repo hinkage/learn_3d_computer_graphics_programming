@@ -21,12 +21,16 @@ set(src_files
     src/vector.c
     src/mesh.h
     src/mesh.c
+    src/swap.h
+    src/swap.c
     src/triangle.h
     src/triangle.c
     src/matrix.h
     src/matrix.c
     src/light.h
     src/light.c
+    src/texture.h
+    src/texture.c
     src/main.c
 )
 
