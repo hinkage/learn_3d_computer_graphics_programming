@@ -1,5 +1,6 @@
 #include "array.h"
 #include "display.h"
+#include "light.h"
 #include "matrix.h"
 #include "mesh.h"
 #include <SDL_timer.h>
@@ -31,8 +32,8 @@ void setup(void) {
     float zfar = 100.0;
     proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
-    load_cube_mesh_data();
-    // load_obj_file_data("./assets/cow.obj");
+    // load_cube_mesh_data();
+    load_obj_file_data("./assets/cube.obj");
 }
 
 void process_input(void) {
@@ -127,25 +128,25 @@ void update(void) {
             transformed_vertices[j] = transformed_vertex;
         }
 
+        // Back-face culling
+        vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
+        vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
+        vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]);
+        // B-A, C-A
+        vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+        vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+        vec3_normalize(&vector_ab);
+        vec3_normalize(&vector_ac);
+        // Use cross product to find perpendicular
+        vec3_t normal = vec3_cross(vector_ab, vector_ac);
+        vec3_normalize(&normal);
+        // Camera ray
+        vec3_t camera_ray = vec3_sub(camera_position, vector_a);
+        // Use dot product to calculate how aligned the camera ray is with
+        // the face normal
+        float dot_normal_camera = vec3_dot(normal, camera_ray);
+        // Bypass the triangles that are looking away from the camera
         if (cull_method == CULL_BACKFACE) {
-            // Back-face culling
-            vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
-            vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
-            vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]);
-            // B-A, C-A
-            vec3_t vector_ab = vec3_sub(vector_b, vector_a);
-            vec3_t vector_ac = vec3_sub(vector_c, vector_a);
-            vec3_normalize(&vector_ab);
-            vec3_normalize(&vector_ac);
-            // Use cross product to find perpendicular
-            vec3_t normal = vec3_cross(vector_ab, vector_ac);
-            vec3_normalize(&normal);
-            // Camera ray
-            vec3_t camera_ray = vec3_sub(camera_position, vector_a);
-            // Use dot product to calculate how aligned the camera ray is with
-            // the face normal
-            float dot_normal_camera = vec3_dot(normal, camera_ray);
-            // Bypass the triangles that are looking away from the camera
             if (dot_normal_camera < 0) {
                 continue;
             }
@@ -167,6 +168,12 @@ void update(void) {
             (transformed_vertices[0].z + transformed_vertices[1].z +
              transformed_vertices[2].z) /
             3.0;
+
+        // Color
+        float light_intensity_factor = -vec3_dot(normal, light.direction);
+        uint32_t triangle_color =
+            light_apply_intensity(mesh_face.color, light_intensity_factor);
+
         triangle_t projected_triangle = {
             .points = {{
                            projected_points[0].x,
@@ -180,7 +187,7 @@ void update(void) {
                            projected_points[2].x,
                            projected_points[2].y,
                        }},
-            .color = mesh_face.color,
+            .color = triangle_color,
             .avg_depth = avg_depth,
         };
         // Save

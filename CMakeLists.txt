@@ -25,6 +25,8 @@ set(src_files
     src/triangle.c
     src/matrix.h
     src/matrix.c
+    src/light.h
+    src/light.c
     src/main.c
 )
 
