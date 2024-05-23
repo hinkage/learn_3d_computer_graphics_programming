@@ -10,7 +10,7 @@ triangle_t *triangles_to_render = NULL;
 
 vec3_t camera_position = {0, 0, 0};
 
-float fov_factor = 628;
+mat4_t proj_matrix;
 
 bool is_running = false;
 int previous_frame_time = 0;
@@ -24,8 +24,15 @@ void setup(void) {
     color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
                                              SDL_TEXTUREACCESS_STREAMING,
                                              window_width, window_height);
+    // Initialize the perspective projection matrix
+    float fov = M_PI / 3;
+    float aspect = window_height / (float)window_width;
+    float znear = 0.1;
+    float zfar = 100.0;
+    proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
+
     load_cube_mesh_data();
-    // load_obj_file_data("./assets/cube.obj");
+    // load_obj_file_data("./assets/cow.obj");
 }
 
 void process_input(void) {
@@ -61,12 +68,6 @@ void process_input(void) {
     }
 }
 
-vec2_t project(vec3_t point) {
-    vec2_t projected_point = {point.x * fov_factor / point.z,
-                              point.y * fov_factor / point.z};
-    return projected_point;
-}
-
 void update(void) {
     int time_to_wait =
         FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
@@ -81,9 +82,9 @@ void update(void) {
     mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.01;
     mesh.rotation.z += 0.01;
-    mesh.scale.x += 0.002;
-    mesh.scale.y += 0.001;
-    mesh.translation.x += 0.01;
+    // mesh.scale.x += 0.002;
+    // mesh.scale.y += 0.001;
+    // mesh.translation.x += 0.01;
     mesh.translation.z = 5;
 
     // Scale matrix
@@ -150,11 +151,14 @@ void update(void) {
             }
         }
 
-        vec2_t projected_points[3];
+        vec4_t projected_points[3];
         for (int j = 0; j < 3; j++) {
             // Project the current vertex
             projected_points[j] =
-                project(vec3_from_vec4(transformed_vertices[j]));
+                mat4_mul_vec4_project(proj_matrix, transformed_vertices[j]);
+            // Scale into the view
+            projected_points[j].x *= (window_width / 2.0);
+            projected_points[j].y *= (window_height / 2.0);
             // Translate to center
             projected_points[j].x += (window_width / 2.0);
             projected_points[j].y += (window_height / 2.0);

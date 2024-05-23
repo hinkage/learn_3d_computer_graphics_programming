@@ -74,7 +74,7 @@ void load_obj_file_data(char *filename) {
                        &vertex_indices[1], &vertex_indices[2]);
             }
             face_t face = {vertex_indices[0], vertex_indices[1],
-                           vertex_indices[2]};
+                           vertex_indices[2], .color = 0xFF333333};
             array_push(mesh.faces, face)
         }
     }
