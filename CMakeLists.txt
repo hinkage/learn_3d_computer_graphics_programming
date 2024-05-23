@@ -22,6 +22,7 @@ set(src_files
     src/mesh.h
     src/mesh.c
     src/triangle.h
+    src/triangle.c
     src/main.c
 )
 
