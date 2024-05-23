@@ -23,6 +23,8 @@ set(src_files
     src/mesh.c
     src/triangle.h
     src/triangle.c
+    src/matrix.h
+    src/matrix.c
     src/main.c
 )
 

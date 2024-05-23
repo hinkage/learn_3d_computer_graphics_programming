@@ -1,7 +1,7 @@
 #include "array.h"
 #include "display.h"
+#include "matrix.h"
 #include "mesh.h"
-#include "vector.h"
 #include <SDL_timer.h>
 #include <stdio.h>
 
@@ -81,6 +81,19 @@ void update(void) {
     mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.01;
     mesh.rotation.z += 0.01;
+    mesh.scale.x += 0.002;
+    mesh.scale.y += 0.001;
+    mesh.translation.x += 0.01;
+    mesh.translation.z = 5;
+
+    // Scale matrix
+    mat4_t scale_matrix =
+        mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+    mat4_t translation_matrix = mat4_make_translation(
+        mesh.translation.x, mesh.translation.y, mesh.translation.z);
+    mat4_t rotation_matrix_x = mat4_make_rotation_x(mesh.rotation.x);
+    mat4_t rotation_matrix_y = mat4_make_rotation_y(mesh.rotation.y);
+    mat4_t rotation_matrix_z = mat4_make_rotation_z(mesh.rotation.z);
 
     // Loop all faces
     int num_faces = array_length(mesh.faces);
@@ -92,29 +105,33 @@ void update(void) {
         face_vertices[1] = mesh.vertices[mesh_face.b - 1];
         face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
-        vec3_t transformed_vertices[3];
+        vec4_t transformed_vertices[3];
 
         for (int j = 0; j < 3; j++) {
-            vec3_t transformed_vertex = face_vertices[j];
+            vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
+            // Scale
+            transformed_vertex =
+                mat4_mul_vec4(scale_matrix, transformed_vertex);
             // Rotate
             transformed_vertex =
-                vec3_rotate_x(transformed_vertex, mesh.rotation.x);
+                mat4_mul_vec4(rotation_matrix_x, transformed_vertex);
             transformed_vertex =
-                vec3_rotate_y(transformed_vertex, mesh.rotation.y);
+                mat4_mul_vec4(rotation_matrix_y, transformed_vertex);
             transformed_vertex =
-                vec3_rotate_z(transformed_vertex, mesh.rotation.z);
+                mat4_mul_vec4(rotation_matrix_z, transformed_vertex);
+            // Translate
+            transformed_vertex =
+                mat4_mul_vec4(translation_matrix, transformed_vertex);
 
-            // Translate the vertex away from camera
-            transformed_vertex.z += 5;
             // Save transformed vertices
             transformed_vertices[j] = transformed_vertex;
         }
 
         if (cull_method == CULL_BACKFACE) {
             // Back-face culling
-            vec3_t vector_a = transformed_vertices[0];
-            vec3_t vector_b = transformed_vertices[1];
-            vec3_t vector_c = transformed_vertices[2];
+            vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
+            vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
+            vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]);
             // B-A, C-A
             vec3_t vector_ab = vec3_sub(vector_b, vector_a);
             vec3_t vector_ac = vec3_sub(vector_c, vector_a);
@@ -137,7 +154,8 @@ void update(void) {
         vec2_t projected_points[3];
         for (int j = 0; j < 3; j++) {
             // Project the current vertex
-            projected_points[j] = project(transformed_vertices[j]);
+            projected_points[j] =
+                project(vec3_from_vec4(transformed_vertices[j]));
             // Translate to center
             projected_points[j].x += (window_width / 2.0);
             projected_points[j].y += (window_height / 2.0);

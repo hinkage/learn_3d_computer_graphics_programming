@@ -92,6 +92,8 @@ vec3_t vec3_rotate_x(vec3_t v, float angle) {
 
 vec3_t vec3_rotate_y(vec3_t v, float angle) {
     // look at y, clockwise, x to z, why?
+    // Infact, this is not the same as y rotation defined by matrix
+    // It should be conterclockwise too
     vec3_t rotated_vector = {.x = v.x * cos(angle) - v.z * sin(angle),
                              .z = v.x * sin(angle) + v.z * cos(angle),
                              .y = v.y};
@@ -104,4 +106,14 @@ vec3_t vec3_rotate_z(vec3_t v, float angle) {
                              .y = v.x * sin(angle) + v.y * cos(angle),
                              .z = v.z};
     return rotated_vector;
+}
+
+vec4_t vec4_from_vec3(vec3_t v) {
+    vec4_t result = {v.x, v.y, v.z, 1.0};
+    return result;
+}
+
+vec3_t vec3_from_vec4(vec4_t v) {
+    vec3_t result = {v.x, v.y, v.z};
+    return result;
 }
