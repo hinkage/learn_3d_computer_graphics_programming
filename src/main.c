@@ -160,6 +160,10 @@ void update(void) {
             // Scale into the view
             projected_points[j].x *= (window_width / 2.0);
             projected_points[j].y *= (window_height / 2.0);
+            // Invert the y values to account for flipped screen y coordinate,
+            // because y axis in model is heading up, but we render buffer from
+            // top to bottom
+            projected_points[j].y *= -1.0;
             // Translate to center
             projected_points[j].x += (window_width / 2.0);
             projected_points[j].y += (window_height / 2.0);
