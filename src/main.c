@@ -24,6 +24,7 @@ void setup(void) {
 
     color_buffer =
         (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
+    z_buffer = (float *)malloc(sizeof(float) * window_width * window_height);
     color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
                                              SDL_TEXTUREACCESS_STREAMING,
                                              window_width, window_height);
@@ -35,9 +36,9 @@ void setup(void) {
     proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
     // load_cube_mesh_data();
-    load_obj_file_data("./assets/crab.obj");
+    load_obj_file_data("./assets/cube.obj");
 
-    load_png_texture_data("./assets/crab.png");
+    load_png_texture_data("./assets/cube.png");
 }
 
 void process_input(void) {
@@ -90,9 +91,9 @@ void update(void) {
     // Initialize the array of triangles to render
     triangles_to_render = NULL;
 
-    // mesh.rotation.x += 0.01;
+    mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.01;
-    // mesh.rotation.z += 0.01;
+    mesh.rotation.z += 0.01;
     // mesh.scale.x += 0.002;
     // mesh.scale.y += 0.001;
     // mesh.translation.x += 0.01;
@@ -284,11 +285,13 @@ void render(void) {
 
     render_color_buffer();
     clear_color_buffer(0xFF000000);
+    clear_z_buffer();
     SDL_RenderPresent(renderer);
 }
 
 void free_resources(void) {
     free(color_buffer);
+    free(z_buffer);
     upng_free(png_texture);
     array_free(mesh.faces);
     array_free(mesh.vertices);

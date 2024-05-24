@@ -7,6 +7,7 @@ SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
 uint32_t *color_buffer = NULL;
+float *z_buffer = NULL;
 SDL_Texture *color_buffer_texture = NULL;
 
 int window_width = 800;
@@ -84,6 +85,17 @@ void clear_color_buffer(uint32_t color) {
     for (int y = 0; y < window_height; y++) {
         for (int x = 0; x < window_width; x++) {
             color_buffer[window_width * y + x] = color;
+        }
+    }
+}
+
+void clear_z_buffer() {
+    for (int y = 0; y < window_height; y++) {
+        for (int x = 0; x < window_width; x++) {
+            // After applied perspective projection, value of z has been between
+            // 0 and 1, 0 is znear, 1 is zfar, smaller z is, closer to screen
+            // the pixel is
+            z_buffer[window_width * y + x] = 1.0f;
         }
     }
 }

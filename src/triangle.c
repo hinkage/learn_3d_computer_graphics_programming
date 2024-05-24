@@ -79,7 +79,7 @@ vec3_t barycentric_weights(vec2_t a, vec2_t b, vec2_t c, vec2_t p) {
     float area_parallelogram_abc = ac.x * ab.y - ac.y * ab.x;
     float alpha = (pc.x * pb.y - pc.y * pb.x) / area_parallelogram_abc;
     float beta = (ac.x * ap.y - ac.y * ap.x) / area_parallelogram_abc;
-    float gamma = 1.0 - alpha - beta;
+    float gamma = 1.0f - alpha - beta;
     vec3_t weights = {alpha, beta, gamma};
     return weights;
 }
@@ -124,7 +124,26 @@ void draw_texel(int x, int y, uint32_t *texture, vec4_t point_a, vec4_t point_b,
     int tex_x = abs((int)(interpolated_u * texture_width)) % texture_width;
     int tex_y = abs((int)(interpolated_v * texture_height)) % texture_height;
 
-    draw_pixel(x, y, texture[tex_y * texture_width + tex_x]);
+    // Initial value in z-buffer is 1.0f, but
+    // w is original z which did not be normalized to [0,1],
+    // so we need to interpolate 1/z to do depth comparison,
+    // but why use 1/w here?
+
+    // Smaller w is, closer to screen the pixel is, greater 1/w is,
+    // adjust 1/w so the pixels that are closer to the camera have smaller
+    // values. Why use 1.0 here?
+    // (1.0 - positive number) is always less than 1.0 which is the initial value of z-buffer.
+    // But what if w is negetive number?
+    interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
+
+    int idx_z_buffer = y * window_width + x;
+    // Only draw the pixel if the depth value is less than the one
+    // previously stored in the z-buffer
+    if (interpolated_reciprocal_w < z_buffer[idx_z_buffer]) {
+        draw_pixel(x, y, texture[tex_y * texture_width + tex_x]);
+        // Update the z-buffer value with the 1/w of this current pixel
+        z_buffer[idx_z_buffer] = interpolated_reciprocal_w;
+    }
 }
 
 void draw_textured_triangle(int x0, int y0, float z0, float w0, float u0,
