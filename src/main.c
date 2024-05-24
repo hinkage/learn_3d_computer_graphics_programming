@@ -6,6 +6,7 @@
 #include "mesh.h"
 #include "texture.h"
 #include "upng.h"
+#include <SDL_keycode.h>
 #include <SDL_pixels.h>
 #include <SDL_timer.h>
 #include <stdio.h>
@@ -58,32 +59,57 @@ void process_input(void) {
         is_running = false;
         break;
     case SDL_KEYDOWN:
-        if (event.key.keysym.sym == SDLK_ESCAPE) {
+        SDL_Keycode sym = event.key.keysym.sym;
+        if (sym == SDLK_ESCAPE) {
             is_running = false;
         }
-        if (event.key.keysym.sym == SDLK_1) {
+        if (sym == SDLK_1) {
             render_method = RENDER_WIRE_VERTEX;
         }
-        if (event.key.keysym.sym == SDLK_2) {
+        if (sym == SDLK_2) {
             render_method = RENDER_WIRE;
         }
-        if (event.key.keysym.sym == SDLK_3) {
+        if (sym == SDLK_3) {
             render_method = RENDER_FILL_TRIANGLE;
         }
-        if (event.key.keysym.sym == SDLK_4) {
+        if (sym == SDLK_4) {
             render_method = RENDER_FILL_TRIANGLE_WIRE;
         }
-        if (event.key.keysym.sym == SDLK_5) {
+        if (sym == SDLK_5) {
             render_method = RENDER_TEXTURED;
         }
-        if (event.key.keysym.sym == SDLK_6) {
+        if (sym == SDLK_6) {
             render_method = RENDER_TEXTURED_WIRE;
         }
-        if (event.key.keysym.sym == SDLK_7) {
+        if (sym == SDLK_7) {
             cull_method = CULL_BACKFACE;
         }
-        if (event.key.keysym.sym == SDLK_8) {
+        if (sym == SDLK_8) {
             cull_method = CULL_NONE;
+        }
+        if (sym == SDLK_UP) {
+            camera.position.y += 3.0f * delta_time;
+        }
+        if (sym == SDLK_DOWN) {
+            camera.position.y -= 3.0f * delta_time;
+        }
+        if (sym == SDLK_a) {
+            camera.yaw += 1.0f * delta_time;
+        }
+        if (sym == SDLK_d) {
+            camera.yaw -= 1.0f * delta_time;
+        }
+        if (sym == SDLK_w) {
+            camera.forward_velocity =
+                vec3_mul(camera.direction, 5.0f * delta_time);
+            camera.position =
+                vec3_add(camera.position, camera.forward_velocity);
+        }
+        if (sym == SDLK_s) {
+            camera.forward_velocity =
+                vec3_mul(camera.direction, 5.0f * delta_time);
+            camera.position =
+                vec3_sub(camera.position, camera.forward_velocity);
         }
         break;
     }
@@ -103,21 +129,22 @@ void update(void) {
     // Initialize the couter of triangles to render for current frame
     num_triangles_to_render = 0;
 
-    mesh.rotation.x += 0.6f * delta_time;
-    mesh.rotation.y += 0.9f * delta_time;
-    mesh.rotation.z += 0.2f * delta_time;
+    // mesh.rotation.x += 0.6f * delta_time;
+    // mesh.rotation.y += 0.9f * delta_time;
+    // mesh.rotation.z += 0.2f * delta_time;
     // mesh.scale.x += 0.02f * delta_time;
     // mesh.scale.y += 0.01f * delta_time;
-    mesh.translation.x += 0.1f * delta_time;
+    // mesh.translation.x += 0.1f * delta_time;
     mesh.translation.z = 5.0f;
 
-    camera.position.x += 0.5f * delta_time;
-    camera.position.y += 0.8f * delta_time;
-
-    // View matrix
-    vec3_t target = {0.0f, 0.f, 5.0f};
-    vec3_t up = {0.0f, 1.0f, 0.0f};
-    view_matrix = mat4_look_at(camera.position, target, up);
+    // Create view matrix
+    vec3_t up_direction = {0, 1, 0};
+    vec3_t target = {0, 0, 1};
+    mat4_t camera_yaw_rotation = mat4_make_rotation_y(camera.yaw);
+    camera.direction = vec3_from_vec4(
+        mat4_mul_vec4(camera_yaw_rotation, vec4_from_vec3(target)));
+    target = vec3_add(camera.position, camera.direction);
+    view_matrix = mat4_look_at(camera.position, target, up_direction);
 
     // Scale matrix
     mat4_t scale_matrix =
