@@ -119,14 +119,12 @@ void draw_texel(int x, int y, uint32_t *texture, vec4_t point_a, vec4_t point_b,
     interpolated_v /= interpolated_reciprocal_w;
 
     // Map the UV coordinate to the full texture width and height
-    int tex_x = abs((int)(interpolated_u * texture_width));
-    int tex_y = abs((int)(interpolated_v * texture_height));
+    // x and y are integers, maybe outside of the triangle in math,
+    // so use mod to prevent texture buffer overflow
+    int tex_x = abs((int)(interpolated_u * texture_width)) % texture_width;
+    int tex_y = abs((int)(interpolated_v * texture_height)) % texture_height;
 
-    if (0 <= tex_y && tex_y < texture_height) {
-        if (0 <= tex_x && tex_x < texture_width) {
-            draw_pixel(x, y, texture[tex_y * texture_width + tex_x]);
-        }
-    }
+    draw_pixel(x, y, texture[tex_y * texture_width + tex_x]);
 }
 
 void draw_textured_triangle(int x0, int y0, float z0, float w0, float u0,
@@ -157,6 +155,12 @@ void draw_textured_triangle(int x0, int y0, float z0, float w0, float u0,
         float_swap(&u0, &u1);
         float_swap(&v0, &v1);
     }
+
+    // Flip the V component to account for inverted UV-coordinates (V grows
+    // downwards), maybe in obj file, or in upng buffer
+    v0 = 1.0 - v0;
+    v1 = 1.0 - v1;
+    v2 = 1.0 - v2;
 
     vec4_t point_a = {x0, y0, z0, w0};
     vec4_t point_b = {x1, y1, z1, w1};
