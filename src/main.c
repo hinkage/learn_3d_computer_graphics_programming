@@ -179,10 +179,6 @@ void update(void) {
             projected_points[j].x += (window_width / 2.0);
             projected_points[j].y += (window_height / 2.0);
         }
-        float avg_depth =
-            (transformed_vertices[0].z + transformed_vertices[1].z +
-             transformed_vertices[2].z) /
-            3.0;
 
         // Color
         float light_intensity_factor = -vec3_dot(normal, light.direction);
@@ -214,15 +210,17 @@ void update(void) {
                     {mesh_face.b_uv.u, mesh_face.b_uv.v},
                     {mesh_face.c_uv.u, mesh_face.c_uv.v},
                 },
-            .color = triangle_color,
-            .avg_depth = avg_depth,
-        };
+            .color = triangle_color};
         // Save
         array_push(triangles_to_render, projected_triangle);
     }
 
-    // Bubble sort big avg_depth to the front of array
-    int num_triangles = array_length(triangles_to_render);
+    // Painter's Algorithm
+    // Can only sort the triangles,
+    // like SVG can only sort the path elements,
+    // this can not compare depth on pixel level.
+    // Bubble sort bigger avg_depth to the front of array
+    /* int num_triangles = array_length(triangles_to_render);
     for (int i = 0; i < num_triangles; i++) {
         for (int j = i + 1; j < num_triangles; j++) {
             if (triangles_to_render[i].avg_depth <
@@ -232,7 +230,7 @@ void update(void) {
                 triangles_to_render[j] = t;
             }
         }
-    }
+    } */
 }
 
 void render(void) {
@@ -245,8 +243,11 @@ void render(void) {
         if (render_method == RENDER_FILL_TRIANGLE ||
             render_method == RENDER_FILL_TRIANGLE_WIRE) {
             draw_filled_triangle(triangle.points[0].x, triangle.points[0].y,
+                                 triangle.points[0].z, triangle.points[0].w,
                                  triangle.points[1].x, triangle.points[1].y,
+                                 triangle.points[1].z, triangle.points[1].w,
                                  triangle.points[2].x, triangle.points[2].y,
+                                 triangle.points[2].z, triangle.points[2].w,
                                  triangle.color);
         }
         if (render_method == RENDER_TEXTURED ||
