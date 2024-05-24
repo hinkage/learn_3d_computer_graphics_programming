@@ -4,6 +4,7 @@
 #include "matrix.h"
 #include "mesh.h"
 #include "texture.h"
+#include "upng.h"
 #include <SDL_timer.h>
 #include <stdio.h>
 
@@ -23,7 +24,7 @@ void setup(void) {
 
     color_buffer =
         (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
-    color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+    color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
                                              SDL_TEXTUREACCESS_STREAMING,
                                              window_width, window_height);
     // Initialize the perspective projection matrix
@@ -33,13 +34,10 @@ void setup(void) {
     float zfar = 100.0;
     proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
-    texture_width = 64;
-    texture_height = 64;
-    // Load hardcoded texture data from static array
-    mesh_texture = (uint32_t *)REDBRICK_TEXTURE;
-
     load_cube_mesh_data();
     // load_obj_file_data("./assets/cube.obj");
+
+    load_png_texture_data("./assets/cube.png");
 }
 
 void process_input(void) {
@@ -291,6 +289,7 @@ void render(void) {
 
 void free_resources(void) {
     free(color_buffer);
+    upng_free(png_texture);
     array_free(mesh.faces);
     array_free(mesh.vertices);
 }

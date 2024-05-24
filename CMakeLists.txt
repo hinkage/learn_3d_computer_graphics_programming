@@ -31,6 +31,8 @@ set(src_files
     src/light.c
     src/texture.h
     src/texture.c
+    src/upng.h
+    src/upng.c
     src/main.c
 )
 

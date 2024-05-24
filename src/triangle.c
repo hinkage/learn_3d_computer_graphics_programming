@@ -85,8 +85,7 @@ vec3_t barycentric_weights(vec2_t a, vec2_t b, vec2_t c, vec2_t p) {
 }
 
 void draw_texel(int x, int y, uint32_t *texture, vec4_t point_a, vec4_t point_b,
-                vec4_t point_c, float u0, float v0, float u1, float v1,
-                float u2, float v2) {
+                vec4_t point_c, text2_t a_uv, text2_t b_uv, text2_t c_uv) {
     vec2_t point_p = {x, y};
     vec2_t a = vec2_from_vec4(point_a);
     vec2_t b = vec2_from_vec4(point_b);
@@ -108,10 +107,10 @@ void draw_texel(int x, int y, uint32_t *texture, vec4_t point_a, vec4_t point_b,
     // 1/w is linear, can be interpolated
     float interpolated_reciprocal_w;
 
-    interpolated_u = (u0 / point_a.w) * alpha + (u1 / point_b.w) * beta +
-                     (u2 / point_c.w) * gamma;
-    interpolated_v = (v0 / point_a.w) * alpha + (v1 / point_b.w) * beta +
-                     (v2 / point_c.w) * gamma;
+    interpolated_u = (a_uv.u / point_a.w) * alpha +
+                     (b_uv.u / point_b.w) * beta + (c_uv.u / point_c.w) * gamma;
+    interpolated_v = (a_uv.v / point_a.w) * alpha +
+                     (b_uv.v / point_b.w) * beta + (c_uv.v / point_c.w) * gamma;
     interpolated_reciprocal_w = (1 / point_a.w) * alpha +
                                 (1 / point_b.w) * beta +
                                 (1 / point_c.w) * gamma;
@@ -162,6 +161,9 @@ void draw_textured_triangle(int x0, int y0, float z0, float w0, float u0,
     vec4_t point_a = {x0, y0, z0, w0};
     vec4_t point_b = {x1, y1, z1, w1};
     vec4_t point_c = {x2, y2, z2, w2};
+    text2_t a_uv = {u0, v0};
+    text2_t b_uv = {u1, v1};
+    text2_t c_uv = {u2, v2};
 
     // Flat bottom
     float inv_slope1 = 0;
@@ -180,8 +182,8 @@ void draw_textured_triangle(int x0, int y0, float z0, float w0, float u0,
                 int_swap(&x_start, &x_end);
             }
             for (int x = x_start; x <= x_end; x++) {
-                draw_texel(x, y, texture, point_a, point_b, point_c, u0, v0, u1,
-                           v1, u2, v2);
+                draw_texel(x, y, texture, point_a, point_b, point_c, a_uv, b_uv,
+                           c_uv);
             }
         }
     }
@@ -203,8 +205,8 @@ void draw_textured_triangle(int x0, int y0, float z0, float w0, float u0,
                 int_swap(&x_start, &x_end);
             }
             for (int x = x_start; x <= x_end; x++) {
-                draw_texel(x, y, texture, point_a, point_b, point_c, u0, v0, u1,
-                           v1, u2, v2);
+                draw_texel(x, y, texture, point_a, point_b, point_c, a_uv, b_uv,
+                           c_uv);
             }
         }
     }
