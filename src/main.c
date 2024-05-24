@@ -22,6 +22,7 @@ mat4_t view_matrix;
 
 bool is_running = false;
 int previous_frame_time = 0;
+float delta_time;
 
 void setup(void) {
     render_method = RENDER_WIRE;
@@ -94,21 +95,24 @@ void update(void) {
     if (0 < time_to_wait && time_to_wait <= FRAME_TARGET_TIME) {
         SDL_Delay(time_to_wait);
     }
+    // Get a delta time factor counterted to senconds to be used to update our
+    // game objects
+    delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0f;
     previous_frame_time = SDL_GetTicks();
 
     // Initialize the couter of triangles to render for current frame
     num_triangles_to_render = 0;
 
-    // mesh.rotation.x += 0.01f;
-    // mesh.rotation.y += 0.01f;
-    // mesh.rotation.z += 0.01f;
-    // mesh.scale.x += 0.002f;
-    // mesh.scale.y += 0.001f;
-    // mesh.translation.x += 0.01f;
+    mesh.rotation.x += 0.6f * delta_time;
+    mesh.rotation.y += 0.9f * delta_time;
+    mesh.rotation.z += 0.2f * delta_time;
+    // mesh.scale.x += 0.02f * delta_time;
+    // mesh.scale.y += 0.01f * delta_time;
+    mesh.translation.x += 0.1f * delta_time;
     mesh.translation.z = 5.0f;
 
-    camera.position.x += 0.01f;
-    camera.position.y += 0.01f;
+    camera.position.x += 0.5f * delta_time;
+    camera.position.y += 0.8f * delta_time;
 
     // View matrix
     vec3_t target = {0.0f, 0.f, 5.0f};
