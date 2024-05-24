@@ -33,6 +33,8 @@ set(src_files
     src/texture.c
     src/upng.h
     src/upng.c
+    src/camera.h
+    src/camera.c
     src/main.c
 )
 

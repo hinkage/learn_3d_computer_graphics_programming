@@ -128,3 +128,32 @@ mat4_t mat4_mul_mat4(mat4_t a, mat4_t b) {
     }
     return m;
 }
+
+mat4_t mat4_look_at(vec3_t eye, vec3_t target, vec3_t up) {
+    // forward (z)
+    vec3_t z = vec3_sub(target, eye);
+    vec3_normalize(&z);
+    // right (x)
+    vec3_t x = vec3_cross(up, z);
+    vec3_normalize(&x);
+    // up (y)
+    vec3_t y = vec3_cross(z, x);
+    // The dot product between two vectors in 3D space is indeed related
+    // to projection, just like in 2D space.
+    // Geometrically, the dot product of two vectors in 3D space measures
+    // how much one vector projects onto the other. If the two vectors are
+    // perpendicular (have a dot product of 0), then one vector does not
+    // project onto the other. If they are parallel, then the dot product is
+    // maximized, equal to the product of their magnitudes.
+    // Dot product of [x.x, x.y, x.z] and [x, y, z] can be explained as
+    // projecting [x, y, z] to new x-axis in camera space, and the length
+    // of new x-axis is 1, so it is the x component of that point in camera
+    // space.
+    mat4_t view_matrix = {.m = {
+                              {x.x, x.y, x.z, -vec3_dot(x, eye)},
+                              {y.x, y.y, y.z, -vec3_dot(y, eye)},
+                              {z.x, z.y, z.z, -vec3_dot(z, eye)},
+                              {0, 0, 0, 1},
+                          }};
+    return view_matrix;
+}
