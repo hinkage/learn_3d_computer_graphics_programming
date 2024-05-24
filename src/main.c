@@ -5,11 +5,15 @@
 #include "mesh.h"
 #include "texture.h"
 #include "upng.h"
+#include <SDL_pixels.h>
 #include <SDL_timer.h>
 #include <stdio.h>
 
+#define MAX_TRIANGLES_PER_MESH 10000
+
 // Array of triangles that should be rendered frame by frame
-triangle_t *triangles_to_render = NULL;
+triangle_t triangles_to_render[MAX_TRIANGLES_PER_MESH];
+int num_triangles_to_render = 0;
 
 vec3_t camera_position = {0, 0, 0};
 
@@ -25,6 +29,9 @@ void setup(void) {
     color_buffer =
         (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
     z_buffer = (float *)malloc(sizeof(float) * window_width * window_height);
+    // Windows OS uses little endian, bytes in uint32_t are reversed
+    // SDL_PIXELFORMAT_RGBA32 is SDL_PIXELFORMAT_ABGR8888
+    // For 0xFF112233, FF is Alpha, 11 is Blue, 22 is Green, 33 is Red
     color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
                                              SDL_TEXTUREACCESS_STREAMING,
                                              window_width, window_height);
@@ -88,8 +95,8 @@ void update(void) {
     }
     previous_frame_time = SDL_GetTicks();
 
-    // Initialize the array of triangles to render
-    triangles_to_render = NULL;
+    // Initialize the couter of triangles to render for current frame
+    num_triangles_to_render = 0;
 
     mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.01;
@@ -212,7 +219,10 @@ void update(void) {
                 },
             .color = triangle_color};
         // Save
-        array_push(triangles_to_render, projected_triangle);
+        if (num_triangles_to_render < MAX_TRIANGLES_PER_MESH) {
+            triangles_to_render[num_triangles_to_render] = projected_triangle;
+            num_triangles_to_render++;
+        }
     }
 
     // Painter's Algorithm
@@ -237,8 +247,7 @@ void render(void) {
     draw_grid();
 
     // Draw triangles on screen
-    int num_triangles = array_length(triangles_to_render);
-    for (int i = 0; i < num_triangles; i++) {
+    for (int i = 0; i < num_triangles_to_render; i++) {
         triangle_t triangle = triangles_to_render[i];
         if (render_method == RENDER_FILL_TRIANGLE ||
             render_method == RENDER_FILL_TRIANGLE_WIRE) {
@@ -276,13 +285,10 @@ void render(void) {
             // Draw vertices
             for (int j = 0; j < 3; j++) {
                 draw_rect(triangle.points[j].x - 3, triangle.points[j].y - 3, 6,
-                          6, 0xFFFF0000);
+                          6, 0xFF0000FF);
             }
         }
     }
-
-    // Clear triangles
-    array_free(triangles_to_render);
 
     render_color_buffer();
     clear_color_buffer(0xFF000000);
