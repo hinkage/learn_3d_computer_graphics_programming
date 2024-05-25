@@ -21,11 +21,16 @@ bool initialize_window(void) {
     // Query fullscreen width and height
     SDL_DisplayMode display_mode;
     SDL_GetCurrentDisplayMode(0, &display_mode);
-    window_width = display_mode.w;
-    window_height = display_mode.h;
-    window =
-        SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                         window_width, window_height, SDL_WINDOW_BORDERLESS);
+    int fullscreen_width = display_mode.w;
+    int fullscreen_height = display_mode.h;
+
+    // Simulating low resolution displays
+    window_width = fullscreen_width / 1;
+    window_height= fullscreen_height / 1;
+
+    window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED, fullscreen_width,
+                              fullscreen_height, SDL_WINDOW_BORDERLESS);
     if (!window) {
         fprintf(stderr, "Error creating SDL window.\n");
         return false;

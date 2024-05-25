@@ -7,6 +7,7 @@
 #include "mesh.h"
 #include "texture.h"
 #include "upng.h"
+#include "vector.h"
 #include <SDL_keycode.h>
 #include <SDL_pixels.h>
 #include <SDL_timer.h>
@@ -30,6 +31,9 @@ void setup(void) {
     set_render_method(RENDER_WIRE);
     set_cull_method(CULL_BACKFACE);
 
+    // Initialize the scene light direction
+    init_light(vec3_new(0, 0, 1));
+
     // Initialize the perspective projection matrix
     float aspectx = (float)get_window_width() / (float)get_window_height();
     float aspecty = (float)get_window_height() / (float)get_window_width();
@@ -43,9 +47,9 @@ void setup(void) {
     init_frustum_planes(fovx, fovy, znear, zfar);
 
     // load_cube_mesh_data();
-    load_obj_file_data("./assets/cube.obj");
+    load_obj_file_data("./assets/f22.obj");
 
-    load_png_texture_data("./assets/cube.png");
+    load_png_texture_data("./assets/f22.png");
 }
 
 void process_input(void) {
@@ -93,36 +97,36 @@ void process_input(void) {
                 set_cull_method(CULL_NONE);
                 break;
             }
-            if (sym == SDLK_UP) {
-                camera.position.y += 3.0f * delta_time;
-                break;
-            }
-            if (sym == SDLK_DOWN) {
-                camera.position.y -= 3.0f * delta_time;
-                break;
-            }
             // Must input capital character to trigger these events, do not know
             // why
-            if (sym == SDLK_a) {
-                camera.yaw += 1.0f * delta_time;
-                break;
-            }
-            if (sym == SDLK_d) {
-                camera.yaw -= 1.0f * delta_time;
-                break;
-            }
             if (sym == SDLK_w) {
-                camera.forward_velocity =
-                    vec3_mul(camera.direction, 5.0f * delta_time);
-                camera.position =
-                    vec3_add(camera.position, camera.forward_velocity);
+                rotate_camera_pitch(3.0 * delta_time);
                 break;
             }
             if (sym == SDLK_s) {
-                camera.forward_velocity =
-                    vec3_mul(camera.direction, 5.0f * delta_time);
-                camera.position =
-                    vec3_sub(camera.position, camera.forward_velocity);
+                rotate_camera_pitch(-3.0 * delta_time);
+                break;
+            }
+            if (sym == SDLK_RIGHT) {
+                rotate_camera_yaw(1.0 * delta_time);
+                break;
+            }
+            if (sym == SDLK_LEFT) {
+                rotate_camera_yaw(-1.0 * delta_time);
+                break;
+            }
+            if (sym == SDLK_UP) {
+                update_camera_forward_velocity(
+                    vec3_mul(get_camera_direction(), 5.0 * delta_time));
+                update_camera_position(vec3_add(get_camera_position(),
+                                                get_camera_forward_velocity()));
+                break;
+            }
+            if (sym == SDLK_DOWN) {
+                update_camera_forward_velocity(
+                    vec3_mul(get_camera_direction(), 5.0 * delta_time));
+                update_camera_position(vec3_sub(get_camera_position(),
+                                                get_camera_forward_velocity()));
                 break;
             }
             break;
@@ -144,7 +148,7 @@ void update(void) {
     // Initialize the couter of triangles to render for current frame
     num_triangles_to_render = 0;
 
-    mesh.rotation.x += 0.6f * delta_time;
+    // mesh.rotation.x += 0.6f * delta_time;
     // mesh.rotation.y += 0.9f * delta_time;
     // mesh.rotation.z += 0.2f * delta_time;
     // mesh.scale.x += 0.02f * delta_time;
@@ -153,13 +157,9 @@ void update(void) {
     mesh.translation.z = 5.0f;
 
     // Create view matrix
+    vec3_t target = get_camera_lookat_target();
     vec3_t up_direction = {0, 1, 0};
-    vec3_t target = {0, 0, 1};
-    mat4_t camera_yaw_rotation = mat4_make_rotation_y(camera.yaw);
-    camera.direction = vec3_from_vec4(
-        mat4_mul_vec4(camera_yaw_rotation, vec4_from_vec3(target)));
-    target = vec3_add(camera.position, camera.direction);
-    view_matrix = mat4_look_at(camera.position, target, up_direction);
+    view_matrix = mat4_look_at(get_camera_position(), target, up_direction);
 
     // Scale matrix
     mat4_t scale_matrix =
@@ -269,7 +269,8 @@ void update(void) {
             }
 
             // Color
-            float light_intensity_factor = -vec3_dot(normal, light.direction);
+            float light_intensity_factor =
+                -vec3_dot(normal, get_light_direction());
             uint32_t triangle_color =
                 light_apply_intensity(mesh_face.color, light_intensity_factor);
 
