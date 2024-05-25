@@ -18,5 +18,6 @@ extern uint32_t *mesh_texture;
 extern upng_t *png_texture;
 
 void load_png_texture_data(char *filename);
+text2_t tex2_clone(text2_t *t);
 
 #endif

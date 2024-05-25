@@ -18,6 +18,11 @@ void load_png_texture_data(char *filename) {
     }
 }
 
+text2_t tex2_clone(text2_t *t) {
+    text2_t result = {t->u, t->v};
+    return result;
+}
+
 // https://notisrac.github.io/FileToCArray/ did not give me correct result
 const uint8_t REDBRICK_TEXTURE[] = {
     0x38, 0x38, 0x38, 0xff, 0x38, 0x38, 0x38, 0xff, 0x38, 0x38, 0x38, 0xff,

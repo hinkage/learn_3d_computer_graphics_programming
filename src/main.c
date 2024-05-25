@@ -52,9 +52,9 @@ void setup(void) {
     init_frustum_planes(fovx, fovy, znear, zfar);
 
     // load_cube_mesh_data();
-    load_obj_file_data("./assets/cube.obj");
+    load_obj_file_data("./assets/crab.obj");
 
-    load_png_texture_data("./assets/cube.png");
+    load_png_texture_data("./assets/crab.png");
 }
 
 void process_input(void) {
@@ -227,7 +227,8 @@ void update(void) {
         polygon_t polygon = create_polygon_from_triangle(
             vec3_from_vec4(transformed_vertices[0]),
             vec3_from_vec4(transformed_vertices[1]),
-            vec3_from_vec4(transformed_vertices[2]));
+            vec3_from_vec4(transformed_vertices[2]), mesh_face.a_uv,
+            mesh_face.b_uv, mesh_face.c_uv);
         // Clip the polygon and returns a new polygon with potential new
         // vertices
         clip_polygon(&polygon);
@@ -236,10 +237,6 @@ void update(void) {
         int num_triangles_after_clipping = 0;
         triangles_from_polygon(&polygon, triangles_after_clipping,
                                &num_triangles_after_clipping);
-        if (polygon.num_vertices > 3) {
-            printf("num poly:%d, num tri: %d\n", polygon.num_vertices,
-                   num_triangles_after_clipping);
-        }
 
         // Loops all the assembled triangles after clipping
         for (int t = 0; t < num_triangles_after_clipping; t++) {
@@ -289,9 +286,20 @@ void update(void) {
                            }},
                 .texcoords =
                     {
-                        {mesh_face.a_uv.u, mesh_face.a_uv.v},
-                        {mesh_face.b_uv.u, mesh_face.b_uv.v},
-                        {mesh_face.c_uv.u, mesh_face.c_uv.v},
+                        {
+                            triangle_after_clipping.texcoords[0].u,
+                            triangle_after_clipping.texcoords[0].v,
+                        },
+
+                        {
+                            triangle_after_clipping.texcoords[1].u,
+                            triangle_after_clipping.texcoords[1].v,
+                        },
+
+                        {
+                            triangle_after_clipping.texcoords[2].u,
+                            triangle_after_clipping.texcoords[2].v,
+                        },
                     },
                 .color = triangle_color};
             // Save
