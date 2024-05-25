@@ -1,17 +1,17 @@
 #include "display.h"
 
-CullMethod cull_method;
-RenderMethod render_method;
+static SDL_Window *window = NULL;
+static SDL_Renderer *renderer = NULL;
 
-SDL_Window *window = NULL;
-SDL_Renderer *renderer = NULL;
+static uint32_t *color_buffer = NULL;
+static float *z_buffer = NULL;
 
-uint32_t *color_buffer = NULL;
-float *z_buffer = NULL;
-SDL_Texture *color_buffer_texture = NULL;
+static SDL_Texture *color_buffer_texture = NULL;
+static int window_width = 800;
+static int window_height = 600;
 
-int window_width = 800;
-int window_height = 600;
+static int render_method = 0;
+static int cull_method = 0;
 
 bool initialize_window(void) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -36,6 +36,17 @@ bool initialize_window(void) {
         return false;
     }
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+    color_buffer =
+        (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
+    z_buffer = (float *)malloc(sizeof(float) * window_width * window_height);
+    // Windows OS uses little endian, bytes in uint32_t are reversed
+    // SDL_PIXELFORMAT_RGBA32 is SDL_PIXELFORMAT_ABGR8888
+    // For 0xFF112233, FF is Alpha, 11 is Blue, 22 is Green, 33 is Red
+    color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
+                                             SDL_TEXTUREACCESS_STREAMING,
+                                             window_width, window_height);
+
     return true;
 }
 
@@ -51,9 +62,10 @@ void draw_grid(void) {
 }
 
 void draw_pixel(int x, int y, uint32_t color) {
-    if (0 <= x && x < window_width && 0 <= y && y < window_height) {
-        color_buffer[window_width * y + x] = color;
+    if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
+        return;
     }
+    color_buffer[window_width * y + x] = color;
 }
 
 void draw_line(int x0, int y0, int x1, int y1, uint32_t color) {
@@ -82,32 +94,80 @@ void draw_rect(int x, int y, int width, int height, uint32_t color) {
 }
 
 void clear_color_buffer(uint32_t color) {
-    for (int y = 0; y < window_height; y++) {
-        for (int x = 0; x < window_width; x++) {
-            color_buffer[window_width * y + x] = color;
-        }
+    for (int i = 0; i < window_width * window_height; i++) {
+        color_buffer[i] = color;
     }
 }
 
 void clear_z_buffer() {
-    for (int y = 0; y < window_height; y++) {
-        for (int x = 0; x < window_width; x++) {
-            // After applied perspective projection, value of z has been between
-            // 0 and 1, 0 is znear, 1 is zfar, smaller z is, closer to screen
-            // the pixel is
-            z_buffer[window_width * y + x] = 1.0f;
-        }
+    for (int i = 0; i < window_width * window_height; i++) {
+        // After applied perspective projection, value of z has been between
+        // 0 and 1, 0 is znear, 1 is zfar, smaller z is, closer to screen
+        // the pixel is
+        z_buffer[i] = 1.0f;
     }
+}
+
+float get_zbuffer_at(int x, int y) {
+    // No clipping, y maybe greater than window_height, then segmentation fault
+    // when access z-buffer
+    // After clipping, y still can be window_height
+    if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
+        // Prevent segmentation fault when access z-buffer
+        return 1.0f;
+    }
+    return z_buffer[y * window_width + x];
+}
+
+void update_zbuffer_at(int x, int y, float value) {
+    if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
+        return;
+    }
+    z_buffer[y * window_width + x] = value;
 }
 
 void render_color_buffer(void) {
     SDL_UpdateTexture(color_buffer_texture, NULL, color_buffer,
                       (int)sizeof(uint32_t) * window_width);
     SDL_RenderCopy(renderer, color_buffer_texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
 }
 
 void destroy_window(void) {
+    free(color_buffer);
+    free(z_buffer);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
+
+bool is_cull_backface(void) { return cull_method == CULL_BACKFACE; }
+
+bool should_render_filled_triangles(void) {
+    return render_method == RENDER_FILL_TRIANGLE ||
+           render_method == RENDER_FILL_TRIANGLE_WIRE;
+}
+
+bool should_render_textured_triangles(void) {
+    return render_method == RENDER_TEXTURED ||
+           render_method == RENDER_TEXTURED_WIRE;
+}
+
+bool should_render_wireframe(void) {
+    return render_method == RENDER_WIRE ||
+           render_method == RENDER_WIRE_VERTEX ||
+           render_method == RENDER_FILL_TRIANGLE_WIRE ||
+           render_method == RENDER_TEXTURED_WIRE;
+}
+
+bool should_render_wire_vertex(void) {
+    return render_method == RENDER_WIRE_VERTEX;
+}
+
+int get_window_width(void) { return window_width; }
+
+int get_window_height(void) { return window_height; }
+
+void set_render_method(int method) { render_method = method; }
+
+void set_cull_method(int method) { cull_method = method; }

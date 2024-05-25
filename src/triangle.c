@@ -56,10 +56,6 @@ void fill_flat_top_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
 
 void draw_triangle_pixel(int x, int y, uint32_t color, vec4_t point_a,
                          vec4_t point_b, vec4_t point_c) {
-    if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
-        // Prevent segmentation fault when access z-buffer
-        return;
-    }
     vec2_t point_p = {x, y};
     vec2_t a = vec2_from_vec4(point_a);
     vec2_t b = vec2_from_vec4(point_b);
@@ -72,10 +68,9 @@ void draw_triangle_pixel(int x, int y, uint32_t color, vec4_t point_a,
                                       (1 / point_b.w) * beta +
                                       (1 / point_c.w) * gamma;
     interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
-    int idx_z_buffer = y * window_width + x;
-    if (interpolated_reciprocal_w < z_buffer[idx_z_buffer]) {
+    if (interpolated_reciprocal_w < get_zbuffer_at(x, y)) {
         draw_pixel(x, y, color);
-        z_buffer[idx_z_buffer] = interpolated_reciprocal_w;
+        update_zbuffer_at(x, y, interpolated_reciprocal_w);
     }
 }
 
@@ -154,13 +149,6 @@ void draw_filled_triangle(int x0, int y0, float z0, float w0, int x1, int y1,
 void draw_triangle_texel(int x, int y, uint32_t *texture, vec4_t point_a,
                          vec4_t point_b, vec4_t point_c, text2_t a_uv,
                          text2_t b_uv, text2_t c_uv) {
-    // No clipping, y maybe greater than window_height, then segmentation fault
-    // when access z-buffer
-    // After clipping, y still can be window_height
-    if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
-        // Prevent segmentation fault when access z-buffer
-        return;
-    }
     vec2_t point_p = {x, y};
     vec2_t a = vec2_from_vec4(point_a);
     vec2_t b = vec2_from_vec4(point_b);
@@ -211,13 +199,12 @@ void draw_triangle_texel(int x, int y, uint32_t *texture, vec4_t point_a,
     // value of z-buffer. But what if w is negetive number?
     interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
 
-    int idx_z_buffer = y * window_width + x;
     // Only draw the pixel if the depth value is less than the one
     // previously stored in the z-buffer
-    if (interpolated_reciprocal_w < z_buffer[idx_z_buffer]) {
+    if (interpolated_reciprocal_w < get_zbuffer_at(x, y)) {
         draw_pixel(x, y, texture[tex_y * texture_width + tex_x]);
         // Update the z-buffer value with the 1/w of this current pixel
-        z_buffer[idx_z_buffer] = interpolated_reciprocal_w;
+        update_zbuffer_at(x, y, interpolated_reciprocal_w);
     }
 }
 

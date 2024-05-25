@@ -40,3 +40,7 @@
 
 然后把多边形dfgbe中每三个点构成一个三角形，图中的三角形应该是以g为起点构造的，得到3个三角形gbe，ged，gdf。
 
+## Rendering Pipeline
+<img src="./assets/images/rendering_pipeline.png" height="500">
+<img src="./assets/images/rendering_pipeline2.png" height="500">
+
