@@ -19,6 +19,8 @@ set(src_files
     src/display.c
     src/vector.h
     src/vector.c
+    src/geometry_cube.h
+    src/geometry_cube.c
     src/mesh.h
     src/mesh.c
     src/swap.h
@@ -31,6 +33,8 @@ set(src_files
     src/light.c
     src/texture.h
     src/texture.c
+    src/texture_redbrick.h
+    src/texture_redbrick.c
     src/upng.h
     src/upng.c
     src/camera.h

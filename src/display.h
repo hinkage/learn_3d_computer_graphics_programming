@@ -30,9 +30,9 @@ float get_zbuffer_at(int x, int y);
 void update_zbuffer_at(int x, int y, float value);
 void destroy_window(void);
 
-bool is_cull_backface(void);
-bool should_render_filled_triangles(void);
-bool should_render_textured_triangles(void);
+bool should_cull_backface(void);
+bool should_render_filled_triangle(void);
+bool should_render_textured_triangle(void);
 bool should_render_wireframe(void);
 bool should_render_wire_vertex(void);
 

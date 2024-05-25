@@ -146,14 +146,14 @@ void destroy_window(void) {
     SDL_Quit();
 }
 
-bool is_cull_backface(void) { return cull_method == CULL_BACKFACE; }
+bool should_cull_backface(void) { return cull_method == CULL_BACKFACE; }
 
-bool should_render_filled_triangles(void) {
+bool should_render_filled_triangle(void) {
     return render_method == RENDER_FILL_TRIANGLE ||
            render_method == RENDER_FILL_TRIANGLE_WIRE;
 }
 
-bool should_render_textured_triangles(void) {
+bool should_render_textured_triangle(void) {
     return render_method == RENDER_TEXTURED ||
            render_method == RENDER_TEXTURED_WIRE;
 }
