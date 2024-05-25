@@ -35,6 +35,8 @@ set(src_files
     src/upng.c
     src/camera.h
     src/camera.c
+    src/clipping.h
+    src/clipping.c
     src/main.c
 )
 

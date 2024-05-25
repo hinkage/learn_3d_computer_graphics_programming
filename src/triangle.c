@@ -150,6 +150,8 @@ void draw_filled_triangle(int x0, int y0, float z0, float w0, int x1, int y1,
 void draw_triangle_texel(int x, int y, uint32_t *texture, vec4_t point_a,
                          vec4_t point_b, vec4_t point_c, text2_t a_uv,
                          text2_t b_uv, text2_t c_uv) {
+    // No clipping, y maybe greater than window_height, then segmentation fault
+    // when access z-buffer
     vec2_t point_p = {x, y};
     vec2_t a = vec2_from_vec4(point_a);
     vec2_t b = vec2_from_vec4(point_b);

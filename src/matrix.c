@@ -80,11 +80,15 @@ mat4_t mat4_make_rotation_z(float angle) {
 }
 
 mat4_t mat4_make_perspective(float fov, float aspect, float znear, float zfar) {
+    // aspect = width / height,
     mat4_t m = {.m = {{0}}};
-    // aspect = height / width = y / x,
-    // so aspect * x = y
-    m.m[0][0] = aspect * (1 / tan(fov / 2));
-    m.m[1][1] = 1 / tan(fov / 2);
+    // t = z / x
+    float t = 1 / tan(fov / 2);
+    // x / aspect = x / (width / height) = x / width * height
+    // so x / width = y / height
+    // so width of view = height of view, viewport is a square
+    m.m[0][0] = t / aspect;
+    m.m[1][1] = t;
     // (z - znear) / distance could be used to calculate x and y on screen using
     // triangle similarity
     m.m[2][2] = zfar / (zfar - znear);
