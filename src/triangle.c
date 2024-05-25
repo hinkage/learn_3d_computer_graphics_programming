@@ -56,6 +56,10 @@ void fill_flat_top_triangle(int x0, int y0, int x1, int y1, int x2, int y2,
 
 void draw_triangle_pixel(int x, int y, uint32_t color, vec4_t point_a,
                          vec4_t point_b, vec4_t point_c) {
+    if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
+        // Prevent segmentation fault when access z-buffer
+        return;
+    }
     vec2_t point_p = {x, y};
     vec2_t a = vec2_from_vec4(point_a);
     vec2_t b = vec2_from_vec4(point_b);
@@ -152,6 +156,11 @@ void draw_triangle_texel(int x, int y, uint32_t *texture, vec4_t point_a,
                          text2_t b_uv, text2_t c_uv) {
     // No clipping, y maybe greater than window_height, then segmentation fault
     // when access z-buffer
+    // After clipping, y still can be window_height
+    if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
+        // Prevent segmentation fault when access z-buffer
+        return;
+    }
     vec2_t point_p = {x, y};
     vec2_t a = vec2_from_vec4(point_a);
     vec2_t b = vec2_from_vec4(point_b);

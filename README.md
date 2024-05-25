@@ -3,16 +3,20 @@
 
 代码来自于学习pikuma.com的课程“3D Graphics From Scratch”。
 
+## Perspective projection
+### 通过fovy计算fovx
+<img src="./assets/images/calculate_fovx_by_fovy.png" height="350">
+
 ## Back-face culling
 
 ## Clipping
 ### 直观理解计算线和平面相交点的算法
 
-![](./assets/images/intersection_of_line_and_plane.png)
+<img src="./assets/images/intersection_of_line_and_plane.png" height="350">
 
 ### 裁剪三角形的算法
 
-![](./assets/images/clipping_triangle_by_right_and_bottom_plane.png)
+<img src="./assets/images/clipping_triangle_by_right_and_bottom_plane.png" height="350">
 
 设在平面以内的点的数组是array。
 

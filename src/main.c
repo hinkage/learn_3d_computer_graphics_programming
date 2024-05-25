@@ -40,14 +40,16 @@ void setup(void) {
                                              SDL_TEXTUREACCESS_STREAMING,
                                              window_width, window_height);
     // Initialize the perspective projection matrix
-    float fov = M_PI / 3.0f;
-    float aspect = (float)window_width / (float)window_height;
+    float aspectx = (float)window_width / (float)window_height;
+    float aspecty = (float)window_height / (float)window_width;
+    float fovy = M_PI / 3.0f;
+    float fovx = atan(tan(fovy / 2.0f) * aspectx) * 2.0f;
     float znear = 0.1f;
     float zfar = 100.0f;
-    proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
+    proj_matrix = mat4_make_perspective(fovy, aspecty, znear, zfar);
 
     // Initialize frustum planes with a point and a normal
-    init_frustum_planes(fov, znear, zfar);
+    init_frustum_planes(fovx, fovy, znear, zfar);
 
     // load_cube_mesh_data();
     load_obj_file_data("./assets/cube.obj");
@@ -134,7 +136,7 @@ void update(void) {
     // Initialize the couter of triangles to render for current frame
     num_triangles_to_render = 0;
 
-    // mesh.rotation.x += 0.6f * delta_time;
+    mesh.rotation.x += 0.6f * delta_time;
     // mesh.rotation.y += 0.9f * delta_time;
     // mesh.rotation.z += 0.2f * delta_time;
     // mesh.scale.x += 0.02f * delta_time;
@@ -163,8 +165,6 @@ void update(void) {
     // Loop all faces
     int num_faces = array_length(mesh.faces);
     for (int i = 0; i < num_faces; i++) {
-        if (i != 4)
-            continue;
         face_t mesh_face = mesh.faces[i];
 
         vec3_t face_vertices[3];
