@@ -145,7 +145,9 @@ $$
 0 & 0 & 0 & 1
 \end{bmatrix}
 $$
+
 得到
+
 $$P_{ortho} =
 \begin{bmatrix}
 \frac{2}{r - l} & 0 & 0 & -\frac{r + l}{r - l} \\
@@ -179,12 +181,19 @@ mat4_t mat4_make_scale(float sx, float sy, float sz) {
 <img src="./assets/images/proof_cos_a_plus_b.png" height="350">
 
 $$\cos(\alpha + \beta) = \cos\alpha \cos\beta - \sin\alpha \sin\beta$$
+
 $$\sin(\alpha + \beta) = \sin\alpha \cos\beta + \cos\alpha \sin\beta$$
+
 $$x' = r\cos(\alpha + \beta) = r\cos\alpha \cos\beta - r\sin\alpha \sin\beta = x \cos\beta - y \sin\beta$$
+
 $$y' = r\sin(\alpha + \beta) = r\sin\alpha \cos\beta + r\cos\alpha \sin\beta = y \cos\beta + x \sin\beta$$
+
 $$\begin{pmatrix}x' \\ y'\end{pmatrix}=\begin{pmatrix}\cos\theta & -\sin\theta \\ \sin\theta & \cos\theta\end{pmatrix}\begin{pmatrix}x \\y\end{pmatrix}$$
+
 $$R_z(\theta) = \begin{pmatrix}\cos\theta & -\sin\theta & 0 \\\sin\theta & \cos\theta & 0 \\0 & 0 & 1\end{pmatrix}$$
+
 $$R_x(\theta) = \begin{pmatrix}1 & 0 & 0 \\ 0 &\cos\theta & -\sin\theta \\ 0 & \sin\theta & \cos\theta\end{pmatrix}$$
+
 $$R_y(\theta) = \begin{pmatrix}\cos\theta & 0 & \sin\theta \\ 0 & 1 & 0 \\ -\sin\theta & 0 & \cos\theta \end{pmatrix}$$
 
 y轴sin的符号是反的，是为了在看向y轴正方向时，让逆时针方向是角度增大的方向。
@@ -480,6 +489,7 @@ void clip_polygon(polygon_t *polygon) {
 
 ## Perspective Projection
 The general form of the perspective projection matrix is:
+
 $$
 P = \begin{bmatrix}
 \frac{2n}{r - l} & 0 & \frac{r + l}{r - l} & 0 \\
@@ -518,6 +528,7 @@ t \cdot \text{aspecty} & 0 & 0 & 0 \\
 0 & 0 & 1 & 0
 \end{bmatrix}
 $$
+
 $$t=\frac{1}{\tan(\frac{\text{fovy}}{2})}$$
 
 <img src="./assets/images/perspective_triangle_similarity.png">
@@ -719,6 +730,7 @@ Primitives are clipped against the view frustum to ensure that only visible port
 
 ### Perspective Divide
 After clipping, vertices are transformed from clip space to normalized device coordinates (NDC) by performing the perspective divide. This step divides the x, y, and z components of each vertex by its w component.
+
 $$x_{ndc} = \frac{x_{clip}}{w_{clip}}, \quad y_{ndc} = \frac{y_{clip}}{w_{clip}}, \quad z_{ndc} = \frac{z_{clip}}{w_{clip}}$$
 
 ### Viewport Transformation
@@ -741,7 +753,9 @@ Combines the fragment’s color with the color already in the framebuffer based 
 ## Handedness Orientation
 ### Cross Product
 定义：
+
 $$\mathbf{a} \times \mathbf{b} = \left( a_y b_z - a_z b_y, a_z b_x - a_x b_z, a_x b_y - a_y b_x \right)$$
+
 数学计算的方式在左手坐标系和右手坐标系都是这样计算的。
 
 <img src="./assets/images/direction_of_normal_vector.png" height="300">
