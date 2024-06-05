@@ -510,6 +510,16 @@ f is the far clipping plane.
 
 这里对于z轴的处理和上面的标准不一样，但是结果仍然正常。
 
+$$
+\begin{bmatrix}
+t \cdot \text{aspecty} & 0 & 0 & 0 \\
+0 & t & 0 & 0 \\
+0 & 0 & \frac{zfar}{zfar - znear} & \frac{-znear \cdot zfar}{zfar - znear} \\
+0 & 0 & 1 & 0
+\end{bmatrix}
+$$
+$$t=\frac{1}{\tan(\frac{\text{fovy}}{2})}$$
+
 <img src="./assets/images/perspective_triangle_similarity.png">
 
 <img src="./assets/images/perspective_matrix.png">
