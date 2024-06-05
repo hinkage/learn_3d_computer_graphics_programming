@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Define project
-project(learn_computer_graphics C)
+project(learn_3d_computer_graphics_programming C)
 
 # Set output directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/x64")
@@ -45,12 +45,12 @@ set(src_files
 )
 
 # Add executable
-add_executable(learn_computer_graphics ${src_files})
+add_executable(learn_3d_computer_graphics_programming ${src_files})
 
 # Find and link SDL2
 find_package(SDL2 CONFIG REQUIRED)
 target_link_libraries(
-    learn_computer_graphics
+    learn_3d_computer_graphics_programming
     PRIVATE
     SDL2::SDL2main
     SDL2::SDL2

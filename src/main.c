@@ -196,8 +196,8 @@ void process_graphics_pipeline_stages(mesh_t *mesh) {
         for (int j = 0; j < 3; j++) {
             vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
-            // Create a World Matrix combining scale, rotation and
-            // translation matrices
+            // Create a World Matrix combining scale, rotation and translation
+            // matrices
             world_matrix = mat4_identity();
             world_matrix = mat4_mul_mat4(scale_matrix, world_matrix);
             world_matrix = mat4_mul_mat4(rotation_matrix_z, world_matrix);

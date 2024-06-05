@@ -114,7 +114,6 @@ void clip_polygon_against_plane(polygon_t *polygon, int plane) {
         }
         // Current vertex is inside the plane
         if (current_dot > 0) {
-            // Why not use "= *current_vertex"
             inside_vertices[num_inside_vertices] = *current_vertex;
             inside_texcoords[num_inside_vertices] = *current_texcoord;
             num_inside_vertices++;

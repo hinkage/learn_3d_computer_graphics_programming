@@ -50,7 +50,7 @@ mat4_t mat4_make_rotation_y(float angle) {
     /*
      * Swap sign of s to keep couterclockwise
      * |  c 0 s 0 |
-     * |  0 0 0 0 |
+     * |  0 1 0 0 |
      * | -s 0 c 0 |
      * |  0 0 0 1 |
      */
@@ -83,7 +83,7 @@ mat4_t mat4_make_perspective(float fovy, float aspecty, float znear,
                              float zfar) {
     // aspecty = height / width,
     mat4_t m = {.m = {{0}}};
-    // t = z / x
+    // t = z / x = z / y
     float t = 1 / tan(fovy / 2);
     // x * aspecty = x * (height / width) = x / width * height
     // so x / width = y / height
@@ -91,8 +91,6 @@ mat4_t mat4_make_perspective(float fovy, float aspecty, float znear,
     // it should be a square to make objects do not distort on x or y
     m.m[0][0] = t * aspecty;
     m.m[1][1] = t;
-    // (z - znear) / distance could be used to calculate x and y on screen using
-    // triangle similarity
     m.m[2][2] = zfar / (zfar - znear);
     m.m[2][3] = -znear * zfar / (zfar - znear);
     // For holding the value of z
